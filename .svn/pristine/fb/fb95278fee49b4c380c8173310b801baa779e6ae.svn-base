@@ -1,0 +1,44 @@
+Ext.define('ezdk-generator.view.main.DatabaseTypeWindow', {
+	extend: 'Ext.window.Window',
+	title:'Step 2',
+	id: 'grid-window',
+    width: 900,
+	height: 400,
+    maxWidth: 900,
+    maxHeight: 400,
+    minWidth: 900,
+    minHeight: 400,
+    iconCls: 'fas fa-address-book',
+    layout: 'fit',
+    autoShow : true,
+    modal:true,
+    items:[{
+        xtype:'form',
+        items:[{
+    			fieldLabel : 'Database Type',
+    			xtype : 'combobox',
+    			name : 'DBtype',
+    			id : 'DBtype',
+    			queryMode : 'local',
+    			typeAhead : true,
+    			displayField : 'databaseType',
+    			valueField : 'databaseType',
+    			allowBlank : false,
+    			forceSelection : false,
+    			multiSelect : false,
+    			store : Ext.create('ezdk-generator.store.DatabaseTypes')        	
+        }]
+    }],
+ 	buttons: [{    	        			
+ 		text: 'Generate',
+ 		formBind: true,
+ 		handler: function() {
+ 			switch(Ext.getCmp('DBtype').getValue()) {
+ 			  case 'MySQL':
+ 			    break;
+ 			  case 'Oracle':
+ 			    break;
+ 			}
+ 		}
+ 	}]
+});

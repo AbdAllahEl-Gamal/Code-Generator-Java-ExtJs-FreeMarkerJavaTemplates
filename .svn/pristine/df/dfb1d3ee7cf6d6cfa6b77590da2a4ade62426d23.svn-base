@@ -1,0 +1,191 @@
+Ext.define('ezdk-generator.view.Generator.GeneratorWindow', {
+	extend: 'Ext.window.Window',
+	title:'Step 1',
+	id: 'grid-window',
+    width: 900,
+	height: 400,
+    maxWidth: 900,
+    maxHeight: 400,
+    minWidth: 900,
+    minHeight: 400,
+    iconCls: 'fas fa-address-book',
+    layout: 'fit',
+    autoShow : true,
+    modal:true,
+    items:[{
+        xtype:'form',
+        items:[
+        	{
+            xtype:'panel',
+            bodyPadding: 10,
+            width: 890,
+            height:160,
+            title: 'Java',
+     	    items: [
+     	    	{
+     	   			fieldLabel : 'Java Type',
+     	   			xtype : 'combobox',
+     	   			name : 'JavaType',
+     	   			id : 'JavaType',
+     	   			queryMode : 'local',
+     	   			typeAhead : true,
+     	   			displayField : 'JavaType',
+     	   			valueField : 'JavaType',
+     	   			allowBlank : false,
+     	   			forceSelection : false,
+     	   			multiSelect : false,
+     	   			listeners: {
+     	   				'select': function(t)
+     	   				{ 
+     	   					if(t.value == 'Basic Java')
+     	   					{
+     	   						Ext.getCmp('checkbox1').enable();
+     	   						Ext.getCmp('checkbox2').enable();
+     	   						Ext.getCmp('checkbox3').enable();
+     	   						Ext.getCmp('checkbox4').disable();
+     	   						Ext.getCmp('checkbox5').disable();
+     	   						Ext.getCmp('checkbox6').disable();
+     	   						Ext.getCmp('checkbox7').disable();
+     	   					}
+     	   					else if(t.value == 'Spring Boot')
+     	   					{
+     	   						Ext.getCmp('checkbox1').enable();
+     	   						Ext.getCmp('checkbox2').disable();
+     	   						Ext.getCmp('checkbox3').disable();
+     	   						Ext.getCmp('checkbox4').enable();
+     	   						Ext.getCmp('checkbox5').enable();
+     	   						Ext.getCmp('checkbox6').enable();
+     	   						Ext.getCmp('checkbox7').enable();
+     	   					} 
+     	   				}
+     	   			},
+     	   		    store : Ext.create('ezdk-generator.store.JavaType')
+     	    	},
+     	        {
+     	            xtype: 'fieldcontainer',
+     	            defaultType: 'radiofield',
+     	            id: 'mycheckboxgroup',
+     	            layout: 'hbox',
+     	            items: [
+     	                {
+     	                    boxLabel  : 'Bean',
+     	                    name      : 'Java',
+     	                    inputValue: '1',
+     	                    id        : 'checkbox1',
+     	                    disabled : true
+     	                }, {
+     	                    boxLabel  : 'DAO',
+     	                    name      : 'Java',
+     	                    inputValue: '2',
+     	                    id        : 'checkbox2',
+     	                    disabled : true
+     	                }, {
+     	                    boxLabel  : 'Servlet',
+     	                    name      : 'Java',
+     	                    inputValue: '3',
+     	                    id        : 'checkbox3',
+     	                    disabled : true
+     	                }, {
+     	                    boxLabel  : 'Repository',
+     	                    name      : 'Java',
+     	                    inputValue: '4',
+     	                    id        : 'checkbox4',
+     	                    disabled : true
+     	                }, {
+     	                    boxLabel  : 'Service',
+     	                    name      : 'Java',
+     	                    inputValue: '5',
+     	                    id        : 'checkbox5',
+     	                    disabled : true
+     	                },{
+     	                    boxLabel  : 'Interface',
+     	                    name      : 'Java',
+     	                    inputValue: '6',
+     	                    id        : 'checkbox6',
+     	                    disabled : true
+     	                },{
+     	                    boxLabel  : 'Controller',
+     	                    name      : 'Java',
+     	                    inputValue: '7',
+     	                    id        : 'checkbox7',
+     	                    disabled : true
+     	                }    	                
+     	            ]
+     	        }
+     	    ],
+        },{
+            xtype:'panel',
+            bodyPadding: 10,
+            width: 890,
+            height:160,
+            title: 'ExtJs',
+     	    items: [
+     	        {
+     	            xtype: 'fieldcontainer',
+     	            defaultType: 'checkboxfield',
+     	            items: [
+     	                {
+     	                    boxLabel  : 'Form',
+     	                    name      : 'ExtJs',
+     	                    inputValue: '8',
+     	                    id        : 'checkbox8'
+     	                },{
+     	                    boxLabel  : 'Store',
+     	                    name      : 'ExtJs',
+     	                    inputValue: '9',
+     	                    id        : 'checkbox9'
+     	                },{
+     	                    boxLabel  : 'Grid',
+     	                    name      : 'ExtJs',
+     	                    inputValue: '10',
+     	                    id        : 'checkbox10'
+     	                }
+     	            ]
+     	        },
+     	    ],
+        }]
+    }],
+ 	buttons: [{    	        			
+ 		text: 'Generate',
+ 		formBind: true,
+ 		handler: function() {
+ 			var JavaType = Ext.getCmp('JavaType').getValue();
+	        var Bean =  Ext.getCmp('checkbox1').checked;
+	        var DAO =  Ext.getCmp('checkbox2').checked;
+	        var Servlet =  Ext.getCmp('checkbox3').checked;
+	        var Repository =  Ext.getCmp('checkbox4').checked;
+	        var Service =  Ext.getCmp('checkbox5').checked;
+	        var Interface =  Ext.getCmp('checkbox6').checked;
+	        var Controller =  Ext.getCmp('checkbox7').checked;
+	        
+	        Ext.Ajax.request({
+	        	url: contextRoot+'/metadata?action=getJava',
+	        	params:
+	        	{
+	        		JavaType: JavaType,
+	        		Bean: Bean,
+	        		DAO: DAO,
+	        		Servlet: Servlet,
+	        		Repository: Repository,
+	        		Service: Service,
+		            Interface: Interface,
+		            Controller: Controller
+	        	}
+	        });
+	        this.up('window').destroy();
+	        Ext.create('ezdk-generator.view.Generator.GeneratorForm',{
+	        	params:
+	        	{
+	        		JavaType: JavaType,
+	        		Bean: Bean,
+	        		DAO: DAO,
+	        		Servlet: Servlet,
+	        		Repository: Repository,
+	        		Service: Service,
+		            Interface: Interface,
+		            Controller: Controller
+	        	}
+	        });
+ 		}
+ 	}]
+});

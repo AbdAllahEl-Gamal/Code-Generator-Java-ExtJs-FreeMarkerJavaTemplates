@@ -1,0 +1,150 @@
+Ext.define('prompt.view.util.UploadGrid', {
+	 extend: 'Ext.grid.Panel',
+	 xtype:'upload-list-grid',
+	 columnLines : true,
+	 width: 400,
+     height: 200,
+     store: {
+         fields: ['name', 'size']
+     },
+	 buttonAlign: 'right',
+     tbar: [{
+         text: 'Add files',
+         handler: function () {
+             var win = Ext.create({
+                 xtype: 'window',
+                 title: 'Upload form',
+                 width: 500,
+                 autoShow: true,
+                 items: {
+                     xtype: 'form',
+                     border: false,
+                     bodyStyle: {
+                         padding: '10px'
+                     },
+                     items: [{
+                    	 xtype:'combo',
+                    	 id:'template-combobox',
+                         fieldLabel:'Template',
+                         name:'template',
+                         queryMode:'local',
+                         store:['ERM Hot Rolling','ESR Plan','EFS Plan','ERM DRP Plan','ERM RMP Plan','Corprate Plan'],
+                         displayField:'template',
+                         autoSelect:true,
+                         forceSelection:true
+                     },{
+                    	 xtype:'datefield',
+                    	 id:'template-datefield',
+                         fieldLabel:'Date :',
+                         name:'promptDate',
+                         format: 'Y-m-d',
+                         maxValue: new Date()
+                     },{
+                         xtype: 'multifilefield',
+                         labelWidth: 80,
+                         fieldLabel: 'Choose file(s)',
+                         anchor: '100%',
+                         accept:'xslx',
+                         allowBlank: false,
+                         margin: 0
+                     }]
+                 },
+                 buttons: [{
+                     text: 'Upload',
+                     handler: function () {
+                         var form = win.down('form').getForm();
+                         if ( !form.isValid() ) 
+                        	 return;
+                         
+                         var template = Ext.getCmp('template-combobox').getValue();
+                         var promptDate = Ext.getCmp('template-datefield').getRawValue();
+                         form.submit({
+                             url: contextRoot + '/documentupload?template='+template+'&promptDate='+promptDate,
+                             waitMsg: 'Uploading your file(s)...',
+                             success: function (f, a) {
+                            	var resp_data = a.response.responseText;
+                            	 			
+                        	   	var json = eval ( resp_data );
+                        	   	if(json.success){
+                        	   		var template = Ext.getCmp('template-combobox').getValue();
+                        	   		var uploadDialogWin = Ext.getCmp('upload-dialog-window');
+                        	    	if( uploadDialogWin != undefined ){
+                        	    		uploadDialogWin.close();
+                        	    	}
+                        	    	win.close();
+                        	    	
+//                        	    	Ext.Msg.alert('Success', json.message );
+                        	    	
+                        	    	var parts = json.fileName.split(/\/|\\/);
+                            	   	if (parts.length == 1) {
+                            	   		filename = parts[0];
+                            	   	} else {
+                            	   		filename = parts.pop();
+                            	  	}
+                            	    
+                            	    readUploadedPromptExcelData(json.fileName,json.filePath,template,json.promptDate);
+//                                 	displayExcelDataInGrid(json.fileName,json.filePath,templateCombobox.getValue());
+                        	   	}   
+                             },
+                             failure: function (f, a) {
+                                 Ext.Msg.alert('Failure', a.result.msg || 'server error', function () {
+                                     win.close();
+                                 });
+                             }
+                         });
+                     }
+                 }, {
+                     text: 'Cancel',
+                     handler: function () {
+                         win.close();
+                     }
+                 }]
+             });
+         }
+     }],
+     columns: [
+         { text: 'name', dataIndex: 'name', width: 200 },
+         { text: 'size', dataIndex: 'size', width: 100, renderer: Ext.util.Format.fileSize }
+     ]
+});
+
+readUploadedPromptExcelData = function (fileName,filePath,template,promptDate){
+	
+	var url = contextRoot +  '/excelreader?dt=' + ( new Date() ).getTime();
+	Ext.Ajax.request ( {
+		url: url,
+		autoAbort: true,
+		disableCaching: true,
+		timeout: 300000,
+		method: "POST",
+		success: readUploadedExcelDataSuccess,
+        failure: function (f, a) {
+            Ext.Msg.alert('Failure', a.result.msg || 'server error', function () {
+                win.close();
+            });
+        },
+		params: {
+			operationType : 'R',
+			fileName : fileName,
+			filePath : filePath,
+			template : template ,
+			promptDate : promptDate
+		},
+		scope: this
+	} );
+};
+
+readUploadedExcelDataSuccess = function(response, options) {
+	var respText = response.responseText;
+	if ( respText.length > 0 ) { 
+		var jsonObject = eval( respText );
+		var jsonMessage = jsonObject.message;
+		var isSuccess = eval ( jsonObject.success );
+		if ( isSuccess ) {
+			status ( 'Categories Saved Successfully' );
+		} else {
+			error ( jsonMessage );
+		}
+	}
+	this.loadDataStore();
+}

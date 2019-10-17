@@ -1,0 +1,154 @@
+Ext.define('ezdk-generator.view.admin.NotificationManagerGridWin',{
+	extend:'Ext.window.Window',
+	title:'Notification Manager',
+	iconCls:'far fa-bell',
+	width:650,
+	height:500,
+	layout: 'fit',
+	autoShow:true,
+	frame: true,
+	defaults:{
+		labelAlign:'top'
+	},
+	grid: undefined,
+	params: {
+	},
+	initComponent:function(){
+		this.params.refWin= this;
+		this.grid = this.createGrid();
+		this.items = [ this.grid ];
+		this.buttons = this.createButtons();
+		this.on('afterrender',this.adjustWin);
+		this.callParent();
+	},
+	createGrid:function(){
+		let grid = {
+			extend: 'Ext.grid.Panel',
+		    xtype: 'gridpanel',
+		    id: 'id_notificationManagerGrid',
+		    titleBar: '{hidden:true;}',
+		    store:  Ext.getStore('notificationsStore'),
+		    stateful: true,
+		    collapsible: false,
+		    multiSelect: false,
+		    headerBorders: false,
+		    frame: false,
+		    columnLines : true,
+		    stripeRows: true,
+		    params: this.params,
+		    reloadStore: function() {
+				this.store.reload();
+		    },
+		    listeners: {
+		    	render: function ( sender, eOpts ){
+		    		this.reloadStore();
+		    	},
+		    	store: {
+			    	load: function ( store, records, successful, operation, eOpts ) {
+		    			var _recordCount = document.getElementById('_numberofrecordsNotifications');
+			    		_recordCount.innerHTML = store.getCount();		    		    
+			    	}
+		    	},
+		    	itemcontextmenu: function( grid, record, item, index, e, eOpts ) {
+                	var grid = Ext.getCmp ('id_notificationManagerGrid');
+                	var actionName = 'Locked';
+ 			        var menu_grid = new Ext.menu.Menu ( { 
+			        	minWidth: 250,
+			    		items: [ {
+			    			iconCls: 'fas fa-edit',
+			    			text: '<span style="font-weight: bold; color: #000080">Edit</span>',
+			    			disabled: false,
+			    			handler: function() {
+			    				Ext.create('ezdk-generator.view.admin.NotificationFormWin', {
+				            		params: {
+				            			notificationId : record.data.notificationId,
+				            			operation : 'U'
+				            		}
+				            	});
+			    			} 
+			    		} ]
+			        } );
+ 			       var position = [e.getX()-20, e.getY() + 5];
+			        e.stopEvent();
+			        menu_grid.showAt(position);
+		    	}
+		    },
+		    columns: [ {
+            	header: '<span style="font-weight: bold; color: #000080">ID</span>', 
+            	dataIndex: 'notificationId',
+            	tooltip: 'ID',
+            	align: 'left',
+               	width: 100,
+               	hidden: true,
+               	sortable: true,
+               	resizable: false,
+               	css: 'white-space:normal;',
+				renderer: function( value , metaData , record , rowIndex , colIndex , store ) {
+					return  '<span style="font-weight: bold; color: #cc3300;">' + value + '</span>';
+				}
+             } , {
+            	header: '<span style="font-weight: bold; color: #000080">Notification</span>', 
+            	dataIndex: 'notificationValue',
+            	tooltip: 'Notification Text',
+            	align: 'left',
+            	flex: 1,
+               	width: 350,
+               	hidden: false,
+               	sortable: true,
+               	resizable: true,
+               	css: 'white-space:normal;',
+				renderer: function( value , metaData , record , rowIndex , colIndex , store ) {
+					let parser = new DOMParser;
+					let text = parser.parseFromString(value,'text/html')
+					return  '<span style="font-weight: bold; color: #000080;">' + text.body.textContent + '</span>';
+				}
+             } ,{
+            	header: '<span style="font-weight: bold; color: #000080">Status</span>', 
+            	dataIndex: 'notificationStatus',
+            	tooltip: 'Status',
+            	align: 'left',
+               	width: 100,
+               	hidden: false,
+               	sortable: true,
+               	resizable: true,
+               	css: 'white-space:normal;',
+				renderer: function( value , metaData , record , rowIndex , colIndex , store ) {
+					return  '<span style="font-weight: bold; color: #000080;">' + value + '</span>';
+				}
+             }],
+		    tbar: [{
+	        	xtype: 'button',
+	        	iconCls:'fas fa-plus-square',
+	        	scope: this,
+				handler: function () {
+					Ext.create('ezdk-generator.view.admin.NotificationFormWin', {
+	            		params: {}
+	            	});
+				}
+		    } , '->' , '-' , {
+	        	xtype: 'button',
+	        	iconCls:'fas fa-sync-alt',
+	        	scope: this,
+				handler: function () {
+					this.grid.reloadStore();
+				}
+	        } , '-' ],
+		    bbar: [ '->' , '-' , '<span style="font-size: 14px; font-weight: bold; color: #000080;">Number of Notification(s)</span>' , '-' , '<span id="_numberofrecordsNotifications" style="font-size: 14px; font-weight: bold; color: #cc3300;">0</span>' , '-' ]
+		};
+		return grid;
+	},
+	createButtons:function (){
+		var buttons = [ {
+			text : '<span style="align:center">Close</center>',
+			scale: 'large',
+			buttonAlign: 'left',
+			scope: this,
+			handler : function () {
+				this.close();
+			}
+		} ];
+		return buttons;
+	},
+	adjustWin: function () {
+	}
+});

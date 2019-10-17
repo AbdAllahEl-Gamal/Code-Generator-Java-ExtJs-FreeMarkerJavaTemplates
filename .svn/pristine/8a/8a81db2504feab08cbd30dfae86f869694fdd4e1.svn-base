@@ -1,0 +1,27 @@
+Ext.define('prompt.view.util.UploadWindow', {
+	 extend: 'Ext.window.Window',
+	 id : 'upload-dialog-window',
+	 xtype:'upload-window',
+	 title: 'Excel upload',
+	 layout: 'fit',
+	 minWidth: 370,
+	 minHeight: 330,
+	 width: 500,
+	 height: 450,
+	 autoScroll: false,
+	 modal: true,
+	 closable : true,
+	 maximizable: true,
+	 bodyStyle: 'padding: 5px',
+	 autoShow: true,
+	 connectionProperties  : undefined,
+	 requires: ['prompt.view.util.UploadGrid'],
+	 initComponent:function(){
+		 var me = this;
+		 this.items=[ {
+			 xtype:'upload-list-grid',
+		 } ]; 
+		 this.callParent();
+	 },
+     buttons: []
+});

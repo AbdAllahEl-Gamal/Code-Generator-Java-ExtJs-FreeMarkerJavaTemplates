@@ -1,0 +1,9 @@
+Ext.define('ezdk-generator.store.DatabaseTypes', {
+	extend: 'Ext.data.Store',
+    autoLoad:true,
+    fields: ['databaseType', 'databaseType'],
+    data : [
+        {"databaseType":"MySQL", "databaseType":"MySQL"},
+        {"databaseType":"Oracle", "databaseType":"Oracle"}
+    ]
+});

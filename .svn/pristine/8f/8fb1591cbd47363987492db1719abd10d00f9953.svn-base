@@ -1,0 +1,119 @@
+Ext.define('ezdk-generator.view.Generator.GeneratorForm', {
+	extend: 'Ext.window.Window',
+    title: 'Step 2',
+    id: 'form-window',
+	width: 900,
+    height: 400,
+    maxWidth: 900,
+    maxHeight: 400,
+    minWidth: 900,
+    minHeight: 400,
+    layout: 'fit',
+    iconCls: 'fas fa-address-book',
+    autoShow : true,
+    modal:true,
+    params:{
+    	JavaType:'',
+    	Type:'',
+		Bean:'',
+		DAO:'',
+		Servlet:'',
+		Repository:'',
+		Service:'',
+        Interface:'',
+        Controller:'',
+        Form:''
+    },
+    items: [{
+    	xtype:'form',
+	    bodyPadding: 15,
+		items : [{
+			fieldLabel : 'Database Type',
+			xtype : 'combobox',
+			name : 'databaseType',
+			id : 'databaseType',
+			queryMode : 'local',
+			typeAhead : true,
+			displayField : 'databaseType',
+			valueField : 'databaseType',
+			allowBlank : false,
+			forceSelection : false,
+			multiSelect : false,
+			store : Ext.create('ezdk-generator.store.DatabaseTypes')        	
+    },{
+			fieldLabel : 'Database Name',
+			xtype : 'combobox',
+			name : 'DBname',
+			id : 'DBname',
+			queryMode : 'local',
+			typeAhead : true,
+			displayField : 'databaseName',
+			valueField : 'databaseName',
+			listeners:{
+	            'select': function(combo,value,index){ 
+	                var input = combo.getValue();
+	                var Combo=Ext.getCmp('DBtables');
+	                var resultStore=Combo.store;
+	                resultStore.reload();
+	            }
+	        },
+			allowBlank : false,
+			forceSelection : false,
+			multiSelect : false,
+			store : Ext.create('ezdk-generator.store.Databases')        	
+    }, {
+			fieldLabel : 'Tables',
+			xtype : 'combobox',
+			name : 'DBtables',
+			id: 'DBtables',
+			queryMode : 'local',
+			typeAhead : true,
+			displayField : 'tableName',
+			valueField : 'tableName',
+			allowBlank : false,
+			forceSelection : false,
+			multiSelect : false,
+			store : Ext.create('ezdk-generator.store.Tables')
+		},{
+			inputType : 'hidden',
+			id : 'submitbutton',
+			name : 'myhiddenbutton',
+			value : 'hiddenvalue'
+		}],
+		buttons : [{
+            text: 'Previous',
+            formBind: true,
+            handler: function() {
+            	this.up('window').destroy();
+            	Ext.create('ezdk-generator.view.Generator.GeneratorWindow');
+        }
+		},
+			{
+			text : 'Next',
+			formBind : true,
+			handler : function(button) {
+				var form = button.up('form').getForm();
+				var formwindow = Ext.getCmp('form-window');
+				var tableName = form.findField('DBtables').getValue();
+				var databaseName = form.findField('DBname').getValue();
+				 Ext.create('ezdk-generator.view.Generator.GeneratorGrid',{
+					 params:{
+						 tableName: tableName,
+						 databaseName: databaseName,
+						 JavaType: formwindow.params.JavaType,
+						 Type: formwindow.params.Type,
+						 Bean: formwindow.params.Bean,
+						 DAO: formwindow.params.DAO,
+						 Servlet: formwindow.params.Servlet,
+						 Repository: formwindow.params.Repository,
+					     Service: formwindow.params.Service,
+					     Interface: formwindow.params.Interface,
+					     Controller: formwindow.params.Controller,
+					     Form: formwindow.params.Form
+					 }
+				 });
+				  button.up('window').destroy();
+			}
+		}]
+    }]
+});

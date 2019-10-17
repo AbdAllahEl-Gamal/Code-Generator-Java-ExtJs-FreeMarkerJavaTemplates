@@ -1,0 +1,65 @@
+.empImage{
+	 border-radius: 50%;
+	 width:45,
+	 height:45
+}
+
+.centerEl{
+	display:block;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.rightEl{
+	display:block;
+	margin-left:auto;
+}
+
+.userProfileName {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 25px;
+    color: #404040;
+}
+
+.userProfileRnk{
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #404040;	
+}
+
+.userProfileDesc {
+    color: #404040;
+    line-height: 20px;
+}
+
+.ezdkimage {
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    width: 150px;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+#copyright {
+   position:absolute;
+   bottom:0;
+   width:100%;
+   height:60px;
+   background: lightblue;
+}
+
+#edms-feedback-form-body {
+   width:100% !important;
+}
+
+.drawing-existing-green {
+  background: #64E986;
+}
+.drawing-obselete-red {
+	background: #ffeaea ;
+	text-decoration: line-through;
+}

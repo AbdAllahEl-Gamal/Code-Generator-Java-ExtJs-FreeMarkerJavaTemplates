@@ -1,0 +1,142 @@
+Ext.define('ezdk-generator.view.main.Grid', {
+	extend: 'Ext.window.Window',
+	title:'Step 3',
+	id: 'grid-window',
+    width: 900,
+	height: 400,
+    maxWidth: 900,
+    maxHeight: 400,
+    minWidth: 900,
+    minHeight: 400,
+    layout: 'fit',
+    iconCls: 'fas fa-address-book',
+    autoShow : true,
+    closeAction:'destroy',
+    modal:true,
+    params:{
+		 tableName:'',
+		 databaseName:'',
+		 Bean:''	 
+	},
+    items: [{  
+        xtype: 'grid',
+        id:'code-columns-grid',
+        border: false,
+        store: Ext.create('ezdk-generator.store.Columns'),
+        reloadStore: function() {
+        	var resultGrid = Ext.getCmp('code-columns-grid');
+			var resultStore = resultGrid.store;
+			var gridWindow = Ext.getCmp('grid-window');
+			resultStore.proxy.extraParams = {
+					tableName : gridWindow.params.tableName,
+					databaseName : gridWindow.params.databaseName,
+					Bean : gridWindow.params.Bean
+			};
+			resultStore.reload();
+        },
+	    listeners: {
+	    	render: function ( sender, eOpts ){
+	    		this.reloadStore();
+	    	}
+	    },
+	    plugins: {
+	        ptype: 'cellediting',
+	        clicksToEdit: 1
+	    },
+        columns: [{
+            header: 'Column Name',
+            dataIndex: 'columnName',
+            width: 150,
+            flex: 1
+        }, {
+            header: 'Column Type',
+            dataIndex: 'dataType',
+            width: 200
+        },  {
+            header: 'Variable Name',
+            dataIndex: 'variableName',
+            width: 150,
+            flex:1,
+            editor: {
+                xtype: 'textfield',
+                allowBlank: false
+            }
+        },{
+                header: 'Variable Type',
+                dataIndex: 'variableType',
+                width: 200
+            
+        },{
+        	header: "Java Variables", 
+        	dataIndex: 'javaVariables',
+        	width: 200,
+        	renderer: function(value, p, r)
+        	{
+        		return r.data['variableType'] + ' ' + r.data['variableName'];
+            }
+        }],
+        tbar:[{
+          	xtype: 'textfield',
+          	fieldLabel: 'Class Name',
+            id: 'className',
+            name: 'className',
+            allowBlank: false
+          }],
+          buttons: [
+              {
+	            text: 'Previous',
+	            formBind: true,
+	            handler: function() {
+	            	this.up('window').destroy();
+	            	Ext.create('ezdk-generator.view.main.Form');
+            }
+	        },{
+	            text: 'Next',
+	            formBind: true,
+	            handler: function(button) {
+	            	var resultGrid = Ext.getCmp('code-columns-grid');
+	            	var data = new Array();
+      	            var records = resultGrid.store.getRange();
+      	            for (var i = 0; i < records.length; i++) 
+      	            {
+      	            	data.push(records[i].data);
+      	            }
+      	            var json =Ext.util.JSON.encode(data);
+      	            var className = Ext.getCmp('className').getValue();
+      	            var gridWindow = Ext.getCmp('grid-window');
+      	            if((className.trim().length > 0) === true)
+      	            {
+      	            	Ext.Ajax.request({
+      	            		url: contextRoot+'/metadata?action=getJavaBean',
+      	            		success: function (r) 
+      	            		{
+      	            			var resp    = Ext.decode(r.responseText);
+    	            		    Ext.DomHelper.append(Ext.getBody(), { 
+    	            		      tag:          'iframe', 
+    	            		      frameBorder:  0, 
+    	            		      width:        0, 
+    	            		      height:       0, 
+    	            		      css:          'display:none;visibility:hidden;height:0px;', 
+    	            		      src:         encodeURI(contextRoot+'/DownloadFileServlet?filePath='+resp.filePath)
+    	            		    });
+      	            			button.up('window').destroy();
+      	            		},
+      	            		failure: function () {
+      	            			
+      	            		},
+ 	                        params:
+ 	                        {
+ 	                        	json: json,
+	        	            	className: className,
+	        	            	Bean: gridWindow.params.Bean
+	 	        	        }
+      	            	});
+      	            }
+      	            else
+      	            {
+      	            	alert("Please enter a class name");
+      	            }
+            }
+	     }]
+    }]
+});

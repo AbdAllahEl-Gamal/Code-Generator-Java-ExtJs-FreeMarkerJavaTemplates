@@ -1,0 +1,309 @@
+Ext.define('prompt.view.util.DailyProductionUploadWindow', {
+	 extend: 'Ext.window.Window',
+	 id : 'daily-production-followup-window',
+	 xtype:'daily-production-followup-window',
+	 title: 'Daily Production Upload Follow-up',
+	 layout: 'fit',
+	 minWidth: 370,
+	 minHeight: 330,
+	 width: 500,
+	 height: 450,
+	 autoScroll: false,
+	 modal: true,
+	 closable : true,
+	 maximizable: true,
+	 bodyStyle: 'padding: 5px',
+	 frame: true,
+	 defaults:{
+		labelAlign:'top'
+	 },
+	 TITLE_SEPARATOR: ' | ' ,
+	 grid: undefined,
+	 params: {
+		refWin: undefined
+	 },
+//	 requires: ['prompt.view.util.UploadGrid'],
+	 initComponent:function(){
+		this.params.refWin= this;
+		this.grid = this.createGrid();
+		this.items = [ this.grid ];
+		this.buttons = this.createButtons();
+		this.on('afterrender',this.adjustWin);
+		this.callParent();
+	 },
+	createGrid:function(){
+		
+		let grid = {
+			extend: 'Ext.grid.Panel',
+		    xtype: 'gridpanel',
+		    titleBar: '{hidden:true;}',
+		    store:  Ext.getStore('budgetHeadersFollowUpStore'),
+		    stateful: true,
+		    collapsible: false,
+		    multiSelect: false,
+		    headerBorders: false,
+		    frame: false,
+		    columnLines : true,
+		    stripeRows: true,
+		    params: this.params,
+		    reloadStore: function() {
+				this.store.proxy.extraParams = { 
+				};
+				this.store.reload();
+		    },
+		    listeners: {
+		    	render: function ( sender, eOpts ){
+		    		this.reloadStore();
+		    	},
+		    	store: {
+			    	load: function ( store, records, successful, operation, eOpts ) {
+			    		var _recordCount = document.getElementById('_numberofrecordsBudHeaderFollowUp');
+			    		_recordCount.innerHTML = store.getCount();
+			    	}
+		    	}
+		    },
+		    columns: [{
+		    	xtype: 'widgetcolumn',
+		        text: 'Cons.%',
+		        width: 100,
+		        sortable: true,
+		        hidden: false,
+		        align: 'center',
+		        dataIndex: 'node34',
+		        widget: {
+		            xtype: 'progressbarwidget',
+		            textTpl: '{value:percent}'
+		        }
+		    }, {
+		        text: 'Year',
+		        width: 75,
+		        sortable: true,
+		        hidden: true,
+		        align: 'center',
+		        dataIndex: 'node1'
+		    }, {
+		        text: 'MCG Combination',
+		        width: 150,
+		        sortable: true,
+		        hidden: true,
+		        align: 'left',
+		        dataIndex: 'node2'
+		    }, {
+		        text: 'Area',
+		        width: 125,
+		        sortable: true,
+		        hidden: true,
+		        align: 'center',
+		        dataIndex: 'node3'
+		    }, {
+		        text: 'Div.',
+		        width: 125,
+		        sortable: true,
+		        hidden: true,
+		        align: 'center',
+		        dataIndex: 'node4'
+		    }, {
+		        text: 'Dept.',
+		        width: 125,
+		        sortable: true,
+		        hidden: true,
+		        align: 'center',
+		        dataIndex: 'node5'
+		    }, {
+		        text: 'Sect.',
+		        width: 125,
+		        sortable: true,
+		        hidden: true,
+		        align: 'center',
+		        dataIndex: 'node6'
+		    }, {
+		        text: 'Subsect.',
+		        width: 125,
+		        sortable: true,
+		        hidden: true,
+		        align: 'center',
+		        dataIndex: 'node7'
+		    }, {
+		        text: 'Dept.Name',
+		        width: 150,
+		        sortable: true,
+		        hidden: ! ( this.params.departmentCode == '' || this.params.departmentCode == undefined ),
+		        align: 'left',
+		        dataIndex: 'node8'
+		    }, {
+		        text: 'Subsect.Name',
+		        width: 150,
+		        sortable: true,
+		        hidden: ! ( this.params.mcg == undefined || this.params.mcg == '' ),
+		        align: 'left',
+		        dataIndex: 'node9'		        	
+		    }, {
+		        text: 'MCG',
+		        width: 50,
+		        sortable: true,
+		        hidden:  ! ( this.params.mcg == undefined || this.params.mcg == '' ),
+		        align: 'center',
+		        dataIndex: 'node10'
+		    }, {
+		        text: 'Budget Number',
+		        width: 150,
+		        sortable: true,
+		        hidden: false,
+		        align: 'center',
+		        dataIndex: 'node11'
+		    }, {
+		        text: 'Budget Description',
+		        width: 250,
+		        sortable: true,
+		        hidden: false,
+		        align: 'left',
+		        dataIndex: 'node12'
+		    }, {
+		        text: 'Class',
+		        width: 100,
+		        sortable: true,
+		        hidden: false,
+		        align: 'center',
+		        dataIndex: 'node14'
+		    }, {
+		        text: 'Type',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'center',
+		        dataIndex: 'node16'
+		    }, {
+		        text: 'Cur.',
+		        width: 50,
+		        sortable: true,
+		        hidden: false,
+		        align: 'center',
+		        dataIndex: 'node17'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'Amount-Cu',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'right',
+		        dataIndex: 'node18'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'Amount-EGP',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'right',
+		        dataIndex: 'node22'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'PR In-Process',
+		        width: 120,
+		        sortable: true,
+		        hidden: true,
+		        align: 'right',
+		        dataIndex: 'node26'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'PR Approved',
+		        width: 120,
+		        sortable: true,
+		        hidden: true,
+		        align: 'right',
+		        dataIndex: 'node27'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'PR Reserved',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'right',
+		        dataIndex: 'node28'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'PO Reserved',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'right',
+		        dataIndex: 'node29'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'HR Reserved',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'right',
+		        dataIndex: 'node30'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'T.Reserved',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'right',
+		        dataIndex: 'node31'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'Av.Amount',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'right',
+		        dataIndex: 'node32'
+		    }, {
+		    	xtype: 'numbercolumn', 
+		    	format:'000,000,000.0',
+		        text: 'Rem.Amount',
+		        width: 120,
+		        sortable: true,
+		        hidden: false,
+		        align: 'right',
+		        dataIndex: 'node33'
+		    }],
+		    tbar: [ gridTitle
+		    , '->' ,'-' , {
+	        	xtype: 'button',
+	        	iconCls:'fas fa-retweet',
+				handler: function () {
+					this.grid.reloadStore();
+				},
+				scope: this
+		    } , '-' ],
+		    bbar: [ '->' , '-' , 'Number of Record(s)' , '-' , '<span id="_numberofrecordsBudHeaderFollowUp">0</span>' , '-' ]
+		};
+		return grid;
+	},
+	createButtons:function (){
+		var buttons = [ {
+			text : '<span style="align:center">Close</center>',
+			scale:'large',
+			buttonAlign: 'left',
+			scope: this,
+			handler : function () {
+				this.close();
+			}
+		} ];
+		return buttons;
+	},
+	adjustWin: function () {
+		var viewportMain = Ext.getCmp('viewport-main');
+		var pageWidth = viewportMain.getSize().width;
+		var pageHeight = viewportMain.getSize().height;
+		var leftMargin = 0.01 * pageWidth;
+		var topMargin = 0.05 * pageHeight;
+		this.setPosition ( leftMargin , topMargin );
+		var windowWidth = pageWidth - ( 2 * leftMargin );
+		var windowHeight = pageHeight - ( 2 * topMargin );
+		this.setSize( windowWidth , windowHeight );
+	}
+});

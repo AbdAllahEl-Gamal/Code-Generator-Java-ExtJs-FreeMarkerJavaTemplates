@@ -1,0 +1,184 @@
+Ext.define('ezdk-generator.view.admin.NotificationFormWin',{
+       extend:'Ext.window.Window',
+       title:'Notification Form',
+       xtype:'notification_form_win',
+       id:'id_notification_form_win',
+       autoShow:true,
+       iconCls:'far fa-bell',
+       controller:'notificationController',
+       requires:['ezdk-generator.view.admin.NotificationFormWinController'],
+       layout:'form',
+       autoScroll: false,
+       modal: true,
+       closable : true,
+       bodyStyle: 'text-align: center;',
+       padding: 3,
+       height : 500,
+       defaults:{
+              labelAlign:'top'
+       },
+       params: {
+    	   notificationId:'',
+    	   operation : 'I'
+   	   },
+       listeners:{
+    	   'close': function(win){
+    		   this.onClose();
+    	   },
+    	   'hide':function(win){
+    	   }
+       },
+       initComponent:function(){
+              this.items = this.createItems();
+              this.buttons = this.createButtons();
+              this.callParent();
+       },
+		afterLoad: function () {
+			var form = Ext.getCmp('notification_form').getForm();
+		},
+		loadForm: function ( notificationId ) {
+			var form = Ext.getCmp('notification_form');
+			form.getForm().load ( {
+				autoAbort: true,
+				timeout: 300000,
+				method: "POST",
+				waitMsg:'Loading...',
+				success:  function ( form , action ) {
+					var responseText = action.response.responseText;
+					var json = eval ( responseText );
+					if ( json.success ) {
+						var data = json.data;
+						let parser = new DOMParser;
+						let html = parser.parseFromString(data.notificationValue,'text/html')
+						form.findField('notificationValue').setValue(html.body.textContent);
+					} else {
+						Ext.Msg.alert('Error', 'Server is not responding');
+					}
+				},
+				failure: function ( form , action ) {
+					var message = 'AJAX request failed to established';
+					var responseText = action.response.responseText;
+					if ( responseText != '' && eval ( responseText.message ) != undefined ) {
+						message = eval ( responseText.message );
+					}
+					Ext.Msg.alert('Error', message );
+				},
+				params: {
+					operationType : 'R',
+					notificationId : notificationId,
+					isForm:'true'
+				}
+			} );
+		},
+       createItems:function(){
+    	   
+    	   let notificationStatusComboBox = Ext.create ( {
+    			name: 'notificationStatus',
+               xtype: 'combobox',
+               queryMode: 'local',
+               displayField: 'name',
+               valueField: 'id',
+               emptyText: 'Select Notification Status',
+               store: [
+                   { id: 'A', name: 'Active' },
+                   { id: 'I', name: 'Inactive' }
+               ],
+               editable: false,
+               listeners : {
+               },
+               scope: this,
+               value: 'A'
+           } );
+    	   
+    	   
+              let items = [ {
+                  url: contextRoot +  '/notification',
+                  xtype:'form',
+                  id:'notification_form',
+                  items: [ {
+                        xtype:'fieldset',
+                        collapsible: false,
+                        collapsed: false,
+                        layout: 'form',
+                        width: '100%',
+                        border: false,
+                        items: [ {
+                            layout: 'column',
+                            border: false,
+                            items: [ {
+                                   columnWidth: 0.35,
+                                   border: false,
+                                   layout: 'form',
+                                   labelAlign: 'center',
+                                   bodyStyle: 'text-align: left',
+                                   items : [ {
+                                	   xtype: 'hiddenfield',
+                                       name: 'notificationId',
+                                       value: ''
+                                   } ]
+                            } ]
+                        } ,{
+                            layout: 'column',
+                            height:40,
+                            border: false,
+                            items: [ {
+                                   columnWidth: 0.35,
+                                   border: false,
+                                   layout: 'form',
+                                   labelAlign: 'center',
+                                   bodyStyle: 'text-align: left',
+                                   items : [ notificationStatusComboBox ]
+                            } ]
+                     } ,{
+                               layout: 'column',
+                               height:350,
+                               border: false,
+                               items: [ {
+                                      columnWidth: 1,
+                                      border: false,
+                                      layout: 'form',
+                                      labelAlign: 'center',
+                                      bodyStyle: 'text-align: left',
+                                      items : [ {
+	         								xtype: 'htmleditor',
+	         		                        name: 'notificationValue',
+	         		                        enableAlignments: true,
+	         		                        enableColors: true,
+	         		                        enableFont: true,
+	         		                        enableFontSize: true,
+	         		                        enableFormat: true,
+	         		                        enableLinks: false,
+	         		                        enableLists: true,
+	         		                        enableSourceEdit: false,
+	         		                        width: '100%',
+	         		                        height: 300
+                                      } ]
+                               } ]
+                        } ]
+                  }]
+           } ];
+           
+           return items;
+       } ,
+       createButtons:function (){
+              var buttons = [ {
+            	  id: 'id_notification_form_SaveButton',
+            	  text: '<span style="font-weight: bold; color: #000080">Save</span>',
+            	  formBind: true,
+            	  listeners: {
+            		  click: 'submitForm'
+            	  }
+              } ];
+              return buttons;
+       },
+       onShow: function ( win , eOpts ) {
+    	   if(this.params.operation == 'U'){
+    		   this.loadForm(this.params.notificationId)
+    	   }
+    	   this.callParent();
+       },
+       onClose : function ( win , eOpts ){
+    	   Ext.getCmp('id_notification_form_win').destroy();
+//    	   this.callParent();
+       }
+} );

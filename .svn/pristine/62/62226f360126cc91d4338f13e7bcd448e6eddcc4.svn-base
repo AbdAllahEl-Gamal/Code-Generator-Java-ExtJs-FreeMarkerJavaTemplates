@@ -1,0 +1,40 @@
+Ext.define('ezdk-generator.view.admin.NotificationFormWinController',{
+	extend:'Ext.app.ViewController',
+	alias:'controller.notificationController',
+	submitForm: function() {
+		var getForm = Ext.getCmp('notification_form');
+		if ( getForm.isValid() ) {
+			operationType = 'I'
+			var notificationId = getForm.getForm().findField('notificationId').getValue();
+			if(notificationId !=undefined && notificationId !='')
+				operationType = 'U'
+					
+					
+			getForm.submit({
+				waitMsg:'Saving...',
+                success: function(form, action) {
+                	var json = eval ( action.response.responseText );
+                	var message = json.message;
+                	Ext.Msg.alert('Success', message );
+                	var grid = Ext.getCmp('id_notificationManagerGrid');
+                	grid.store.reload();
+                },
+                failure: function(form, action) {
+                	var json = eval ( action.response.responseText );
+                	var message = json.message;
+                    Ext.Msg.alert( 'ERROR-B1001', message );
+                },
+                params : {
+                	operationType : operationType
+                }
+            });
+		} else {
+			Ext.MessageBox.show ( {
+				title: "ERROR-A1001",
+				msg: "Please fill the required fields correctly.",
+				buttons: Ext.MessageBox.OK,
+				icon: Ext.MessageBox.WARNING
+			} );
+		}
+	}
+} );

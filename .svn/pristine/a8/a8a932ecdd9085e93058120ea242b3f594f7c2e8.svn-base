@@ -1,0 +1,174 @@
+Ext.define('ezdk-generator.view.Generator.GeneratorGrid', {
+	extend: 'Ext.window.Window',
+	title:'Step 3',
+	id: 'grid-window',
+    width: 900,
+	height: 400,
+    maxWidth: 900,
+    maxHeight: 400,
+    minWidth: 900,
+    minHeight: 400,
+    layout: 'fit',
+    iconCls: 'fas fa-address-book',
+    autoShow : true,
+    closeAction:'destroy',
+    modal:true,
+    params:{
+		 tableName:'',
+		 databaseName:'',
+		 JavaType:'',
+		 Type:'',
+		 Bean:'',
+		 DAO:'',
+		 Servlet:'',
+		 Repository:'',
+		 Service:'',
+	     Interface:'',
+	     Controller:'',
+	     Form:''
+	},
+    items: [{  
+        xtype: 'grid',
+        id:'code-columns-grid',
+        border: false,
+        store: Ext.create('ezdk-generator.store.Columns'),
+        reloadStore: function() {
+        	var resultGrid = Ext.getCmp('code-columns-grid');
+			var resultStore = resultGrid.store;
+			var gridWindow = Ext.getCmp('grid-window');
+			resultStore.proxy.extraParams = {
+					tableName : gridWindow.params.tableName,
+					databaseName : gridWindow.params.databaseName
+			};
+			resultStore.reload();
+        },
+	    listeners: {
+	    	render: function ( sender, eOpts ){
+	    		this.reloadStore();
+	    	}
+	    },
+	    plugins: {
+	        ptype: 'cellediting',
+	        clicksToEdit: 1
+	    },
+        columns: [{
+            header: 'Column Name',
+            dataIndex: 'columnName',
+            width: 150,
+            flex: 1
+        }, {
+            header: 'Column Type',
+            dataIndex: 'dataType',
+            width: 200
+        },  {
+            header: 'Variable Name',
+            dataIndex: 'variableName',
+            width: 150,
+            flex:1,
+            editor: {
+                xtype: 'textfield',
+                allowBlank: false
+            }
+        },{
+                header: 'XType',
+                dataIndex: 'xType',
+                width: 200,
+                editor: {
+                    xtype: 'combobox',
+                    displayField: 'xType',
+                    valueField: 'xType',
+                    store: Ext.create('ezdk-generator.store.XType')
+                }
+        },{
+            header: 'Allow Blank',
+            dataIndex: 'allowB',
+            width: 200,
+            editor: {
+                xtype: 'combobox',
+                displayField: 'allowB',
+                valueField: 'allowB',
+                store: Ext.create('ezdk-generator.store.AllowBlank')
+            }
+    }],
+        tbar:[{
+          	xtype: 'textfield',
+          	fieldLabel: 'Class Name',
+            id: 'className',
+            name: 'className',
+            allowBlank: false
+          },{
+        	xtype: 'textfield',
+            fieldLabel: 'App Name',
+            id: 'appName',
+            name: 'appName',
+            listeners: {
+            },
+          }],
+          buttons: [
+              {
+	            text: 'Previous',
+	            formBind: true,
+	            handler: function() {
+	            	this.up('window').destroy();
+	            	Ext.create('ezdk-generator.view.Generator.GeneratorForm');
+            }
+	        },{
+	            text: 'Next',
+	            formBind: true,
+	            handler: function(button) {
+	            	var resultGrid = Ext.getCmp('code-columns-grid');
+	            	var data = new Array();
+      	            var records = resultGrid.store.getRange();
+      	            for (var i = 0; i < records.length; i++) 
+      	            {
+      	            	data.push(records[i].data);
+      	            }
+      	            var json =Ext.util.JSON.encode(data);
+      	            var className = Ext.getCmp('className').getValue();
+      	            var appName = Ext.getCmp('appName').getValue();
+      	            var gridWindow = Ext.getCmp('grid-window');
+      	            if((className.trim().length > 0) === true)
+      	            {
+      	            	Ext.Ajax.request({
+      	            		url: contextRoot+'/metadata?action=getJava',
+      	            		success: function (r) 
+      	            		{
+      	            			var resp    = Ext.decode(r.responseText);
+    	            		    Ext.DomHelper.append(Ext.getBody(), { 
+    	            		      tag:          'iframe', 
+    	            		      frameBorder:  0, 
+    	            		      width:        0, 
+    	            		      height:       0, 
+    	            		      css:          'display:none;visibility:hidden;height:0px;', 
+    	            		      src:         encodeURI(contextRoot+'/DownloadFileServlet?filePath='+resp.filePath)
+    	            		    });
+      	            			button.up('window').destroy();
+      	            		},
+      	            		failure: function () {
+      	            			
+      	            		},
+ 	                        params:
+ 	                        {
+ 	                        	json: json,
+	        	            	className: className,
+	        	            	appName: appName,
+	        	            	JavaType: gridWindow.params.JavaType,
+	   						    Bean: gridWindow.params.Bean,
+	   						    DAO: gridWindow.params.DAO,
+	   						    Servlet: gridWindow.params.Servlet,
+	   						    Repository: gridWindow.params.Repository,
+	   						    Service: gridWindow.params.Service,
+	   						    Interface: gridWindow.params.Interface,
+	   						    Controller: gridWindow.params.Controller,
+	   						    Form: gridWindow.params.Form
+	 	        	        }
+      	            	});
+      	            }
+      	            else
+      	            {
+      	            	alert("Please enter a class name");
+      	            }
+            }
+	     }]
+    }]
+});
